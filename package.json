@@ -1,0 +1,22 @@
+{
+  "name": "mybitly",
+  "version": "1.0.0",
+  "description": "Simple Client-server app",
+  "main": "app.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Morfinbrood/MybitLy.git"
+  },
+  "author": "Yury Staravoitau",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Morfinbrood/MybitLy/issues"
+  },
+  "homepage": "https://github.com/Morfinbrood/MybitLy#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
