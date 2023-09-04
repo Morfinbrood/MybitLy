@@ -3,8 +3,8 @@ import session from "express-session";
 import redisStorage from 'connect-redis';
 import redis from 'redis';
 
-const client = redis.createClient();
-client.connect().catch(console.error);
+const redisClient = redis.createClient();
+redisClient.connect().catch(console.error);
 
 const app = express()
 const host = '127.0.0.1';
@@ -25,7 +25,7 @@ app.use(
         store: new redisStorage({
             host: host,
             port: 6379,
-            client: client,
+            client: redisClient,
             prefix: "MybitLy",
             ttl: 3600000,
         }),
