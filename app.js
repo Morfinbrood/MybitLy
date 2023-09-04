@@ -1,13 +1,17 @@
 import express from "express";
 
-
 const app = express()
 const port = 3000
 
-app.get('/', (req, res) => {
-    res.send('Hello World!')
+// add validation subpart
+app.get("/:subpart", (req, res) => {
+    res.send("subpart: " + req.params["subpart"])
 })
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
+
+app.use(function (req, res, next) {
+    res.status(404).send('Sorry cant find that!');
+});
