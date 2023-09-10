@@ -1,54 +1,51 @@
 import { } from 'dotenv/config'
 
 import express from "express";
+import session from "express-session";
 import redis from 'redis';
-import { addRedisClientInitMessage } from './redis/utils.js';
-import * as expressUse from './express/middleware.js'
-import * as expressGet from './express/routes.js'
+import redisStorage from 'connect-redis';
 
-import { MongoClient, ServerApiVersion } from 'mongodb';
-
+import recordRoutes from './routes/routes.js'
+import dbService from './db_service/db_service.js'
 
 
 const redisClient = redis.createClient();
 redisClient.connect().catch(console.error);
 
-addRedisClientInitMessage(redisClient);
+redisClient.on('error', function (err) {
+    console.log('Could not establish a connection with redis. ' + err);
+});
+redisClient.on('connect', function (err) {
+    console.log('Connected to redis successfully');
+});
+
 const app = express()
 
-const PORT = process.env.EXPRESS_PORT || 7000;
-const HOST = process.env.EXPRESS_HOST || '127.0.0.1';
-app.listen(PORT, HOST, function () {
-    console.log(`Server listens http://${HOST}:${PORT}`);
+app.use(function (err, req, res, next) {
+    console.error(err.stack)
+    res.status(500).send('Something broke!')
+})
+
+app.listen(process.env.EXPRESS_PORT, process.env.EXPRESS_HOST, function () {
+    console.log(`Server listens http://${process.env.EXPRESS_PORT}:${process.env.EXPRESS_HOST}`);
 });
 
-expressUse.addExpressErrorHandler(app);
-expressUse.addExpressIgnoreFavicon(app);
-expressUse.addRedisSession(app, redisClient);
+app.use(recordRoutes);
 
-expressGet.addHomepageRoute(app, '/');
-expressGet.addSubpartsRoute(app, '/:subpart');
+app.use(
+    session({
+        store: new redisStorage({
+            host: process.env.EXPRESS_HOST,
+            port: process.env.REDIS_STORAGE_PORT,
+            resave: true,
+            saveUninitialized: true,
+            client: redisClient,
+            ttl: process.env.REDIS_STORAGE_TTL,
+        }),
+        secret: 'you secret key',
+        saveUninitialized: true,
+    })
+);
 
 
-const uri = process.env.ATLAS_URI;
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
-});
-async function run() {
-    try {
-        // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
-        // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
-    } finally {
-        // Ensures that the client will close when you finish/error
-        await client.close();
-    }
-}
-run().catch(console.dir);
+dbService.connect();
