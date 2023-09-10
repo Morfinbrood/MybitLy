@@ -1,7 +1,7 @@
 import session from "express-session";
 import redisStorage from 'connect-redis';
 import { ignoreFavicon } from './utils.js';
-import { EXPRESS_HOST, REDIS_STORAGE_PORT, REDIS_STORAGE_TTL } from "../constants/constants.js";
+import { REDIS_STORAGE_TTL } from "../constants/constants.js";
 
 
 export function addExpressErrorHandler(expressApp) {
@@ -19,12 +19,12 @@ export function addRedisSession(expressApp, redisClient) {
     expressApp.use(
         session({
             store: new redisStorage({
-                host: EXPRESS_HOST,
-                port: REDIS_STORAGE_PORT,
+                host: process.env.EXPRESS_HOST,
+                port: process.env.REDIS_STORAGE_PORT,
                 resave: true,
                 saveUninitialized: true,
                 client: redisClient,
-                ttl: REDIS_STORAGE_TTL,
+                ttl: process.env.REDIS_STORAGE_TTL,
             }),
             secret: 'you secret key',
             saveUninitialized: true,
