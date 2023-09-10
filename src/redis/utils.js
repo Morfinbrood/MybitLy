@@ -1,4 +1,4 @@
-export function redisClientOnMessages(redisClient) {
+export function addRedisClientInitMessage(redisClient) {
     redisClient.on('error', function (err) {
         console.log('Could not establish a connection with redis. ' + err);
     });
