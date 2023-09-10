@@ -30,8 +30,6 @@ app.listen(process.env.EXPRESS_PORT, process.env.EXPRESS_HOST, function () {
     console.log(`Server listens http://${process.env.EXPRESS_PORT}:${process.env.EXPRESS_HOST}`);
 });
 
-app.use(recordRoutes);
-
 app.use(
     session({
         store: new redisStorage({
@@ -47,5 +45,6 @@ app.use(
     })
 );
 
+app.use(recordRoutes);
 
 dbService.connect();

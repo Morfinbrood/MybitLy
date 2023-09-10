@@ -5,7 +5,7 @@ const recordRoutes = express.Router();
 
 recordRoutes.use(ignoreFavicon);
 
-recordRoutes.route('/', (req, res) => {
+recordRoutes.get('/', (req, res) => {
     if (req?.session?.id) {
         res.write(`<h1>Welcome  you session with uid:</h1><br>`);
         res.write(`<h1> ${req.session.id} </h1><br>`);
@@ -15,7 +15,7 @@ recordRoutes.route('/', (req, res) => {
     }
 });
 
-recordRoutes.route('/:subpart', (req, res) => {
+recordRoutes.get('/:subpart', (req, res) => {
     console.log("subpart: " + req.params["subpart"]);
     res.send("subpart: " + req.params["subpart"]);
 });
