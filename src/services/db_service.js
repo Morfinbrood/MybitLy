@@ -1,5 +1,7 @@
 import { MongoClient, ServerApiVersion } from 'mongodb';
 
+const uri = process.env.ATLAS_URI;
+
 const client = new MongoClient(uri, {
     serverApi: {
         version: ServerApiVersion.v1,
@@ -10,8 +12,6 @@ const client = new MongoClient(uri, {
 
 const dbService = {};
 dbService.connect = () => {
-
-    const uri = process.env.ATLAS_URI;
     async function run() {
         try {
             // Connect the client to the server	(optional starting in v4.7)

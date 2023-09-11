@@ -2,22 +2,14 @@ import { } from 'dotenv/config'
 
 import express from "express";
 import session from "express-session";
-import redis from 'redis';
 import redisStorage from 'connect-redis';
 
 import recordRoutes from './routes/routes.js'
-import dbService from './db_service/db_service.js'
+import dbService from './services/db_service.js'
+import redisService from './services/redis_service.js';
 
 
-const redisClient = redis.createClient();
-redisClient.connect().catch(console.error);
-
-redisClient.on('error', function (err) {
-    console.log('Could not establish a connection with redis. ' + err);
-});
-redisClient.on('connect', function (err) {
-    console.log('Connected to redis successfully');
-});
+const redisClient = redisService.startClient();
 
 const app = express()
 
