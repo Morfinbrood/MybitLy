@@ -1,7 +1,13 @@
 import express from "express";
-import { ignoreFavicon } from '../utils.js';
+import { ignoreFavicon } from '../utils/utils.js';
+import mybitlyService from '../mybitly/mybitly.js'
 
 const recordRoutes = express.Router();
+
+recordRoutes.use(function (err, req, res, next) {
+    console.error(err.stack)
+    res.status(500).send('Something broke!')
+})
 
 recordRoutes.use(ignoreFavicon);
 
@@ -16,9 +22,13 @@ recordRoutes.get('/', (req, res) => {
 });
 
 recordRoutes.get('/:subpart', (req, res) => {
-    console.log("subpart: " + req.params["subpart"]);
-    res.send("subpart: " + req.params["subpart"]);
+    const subpart = req.params["subpart"];
+    const redirectLink = mybitlyService.getRedirectLink(subpart);
+    if (redirectLink) {
+        res.redirect(redirectLink);
+    } else {
+        res.status(404).send('link not found')
+    }
 });
-
 
 export default recordRoutes;

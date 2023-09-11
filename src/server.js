@@ -13,11 +13,6 @@ const redisClient = redisService.startClient();
 
 const app = express()
 
-app.use(function (err, req, res, next) {
-    console.error(err.stack)
-    res.status(500).send('Something broke!')
-})
-
 app.listen(process.env.EXPRESS_PORT, process.env.EXPRESS_HOST, function () {
     console.log(`Server listens http://${process.env.EXPRESS_PORT}:${process.env.EXPRESS_HOST}`);
 });
