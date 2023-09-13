@@ -6,7 +6,7 @@ const recordRoutes = express.Router();
 
 recordRoutes.use(function (err, req, res, next) {
     console.error(err.stack)
-    res.status(500).send('Something broke!')
+    res.status(500).send('Something broke!').end();
 })
 
 recordRoutes.use(ignoreFavicon);
@@ -30,5 +30,31 @@ recordRoutes.get('/:subpart', (req, res) => {
         res.status(404).send('link not found')
     }
 });
+
+recordRoutes.put('/api/addlink', (req, res) => {
+    if (!req.query || !req.query.sessionId || !req.query.link) {
+        return res.sendStatus(400);
+    }
+
+    const userSessionId = req.query.sessionId;
+    const newLink = req.query.link;
+
+
+    const isLinkAdded = mybitlyService.addLink(userSessionId, newLink);
+    if (isLinkAdded) {
+        res.status(200).send('the link successfully added').end();
+    }
+    else {
+        if (isLinkAdded?.failedReason) {
+            if (isLinkAdded?.failedReason === 'exist') {
+                res.status(200).send('the link cannot be added because it already exists record with the same name').end();
+            }
+            res.status(200).send(isLinkAdded.failedReason).end();
+        }
+        res.status(500).send('Something broke! on server').end();
+    }
+
+});
+
 
 export default recordRoutes;

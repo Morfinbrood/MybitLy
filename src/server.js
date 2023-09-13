@@ -5,7 +5,6 @@ import session from "express-session";
 import redisStorage from 'connect-redis';
 
 import recordRoutes from './routes/routes.js'
-import dbService from './services/db_service.js'
 import redisService from './services/redis_service.js';
 
 
@@ -33,5 +32,3 @@ app.use(
 );
 
 app.use(recordRoutes);
-
-dbService.connect();

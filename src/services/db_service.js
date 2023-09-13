@@ -1,28 +1,62 @@
 import { MongoClient, ServerApiVersion } from 'mongodb';
 
 const uri = process.env.ATLAS_URI;
-
-let database;
 const dbName = "mybitly";
-const collectionName = "links";
-
-const client = new MongoClient(uri, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
-});
+const collectionLinks = "links";
 
 const dbService = {};
 
-dbService.insertOne = async (value) => {
+dbService.connect = async () => {
+    const client = new MongoClient(uri, {
+        serverApi: {
+            version: ServerApiVersion.v1,
+            strict: true,
+            deprecationErrors: true,
+        }
+    });
     try {
-        const insertOneResult = await collection.insertOne(value);
-        console.log(`${insertOneResult.insertedCount} document successfully inserted.\n`);
+        await client.connect();
+        console.log('connection opened');
+        return client;
     } catch (err) {
         console.error(`Something went wrong trying to insert the new documents: ${err}\n`);
     }
+
+}
+
+dbService.closeConnection = async (client) => {
+    try {
+        await client.close();
+        console.log('connection closed');
+    } catch (err) {
+        console.error(`Something went wrong trying to insert the new documents: ${err}\n`);
+        return false;
+    }
+}
+
+
+dbService.insertLink = async (userSession, link) => {
+    const client = await dbService.connect();
+    const db = client.db(dbName);
+    const collection = db.collection(collectionLinks);
+    const sessionRecord = {
+        creatorSession: userSession,
+        links: [link, "/nodejs.org"]
+    }
+    try {
+        const insertOneResult = await collection.insertOne(sessionRecord);
+        console.log(`${insertOneResult.insertedCount} document successfully inserted.\n`);
+        return true;
+    } catch (err) {
+        console.error(`Something went wrong trying to insert the new documents: ${err}\n`);
+        return false;
+    } finally {
+        await dbService.closeConnection(client);
+    }
+}
+
+dbService.findLink = async () => {
+    return false;
 }
 
 dbService.isSessionActive = async (session) => {
@@ -41,22 +75,6 @@ dbService.isSessionActive = async (session) => {
         console.error(`Something went wrong trying to find session:${session}  err:${err}\n`);
     }
 
-}
-
-dbService.connect = () => {
-    async function run() {
-        try {
-            await client.connect();
-            database = client.db(dbName);
-            // Send a ping to confirm a successful connection
-            await client.db(dbName).command({ ping: 1 });
-            console.log("Pinged your deployment. You successfully connected to MongoDB!");
-        } finally {
-            // Ensures that the client will close when you finish/error
-            await client.close();
-        }
-    }
-    run().catch(console.dir);
 }
 
 export default dbService;
