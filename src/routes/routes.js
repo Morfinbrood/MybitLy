@@ -32,15 +32,15 @@ recordRoutes.get('/:subpart', (req, res) => {
 });
 
 recordRoutes.put('/api/addlink', (req, res) => {
-    if (!req.query || !req.query.sessionId || !req.query.link) {
+    if (!req.query || !req.query.sessionId || !req.query.link || !req.query.subPart) {
         return res.sendStatus(400);
     }
 
     const userSessionId = req.query.sessionId;
     const newLink = req.query.link;
+    const subPart = req.query.subPart;
 
-
-    const isLinkAdded = mybitlyService.addLink(userSessionId, newLink);
+    const isLinkAdded = mybitlyService.addLink(userSessionId, newLink, subPart);
     if (isLinkAdded) {
         res.status(200).send('the link successfully added').end();
     }
