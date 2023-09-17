@@ -23,9 +23,9 @@ recordRoutes.get('/', (req, res) => {
 
 recordRoutes.get('/:subpart', async (req, res) => {
     const subpart = req.params["subpart"];
-    const redirectLink = mybitlyService.getRedirectLink(subpart);
+    const redirectLink = await mybitlyService.getRedirectLink(subpart);
     if (redirectLink) {
-        res.redirect(redirectLink);
+        res.status(301).redirect(`https://${redirectLink}`);
     } else {
         res.status(404).send('link not found')
     }
@@ -40,7 +40,7 @@ recordRoutes.put('/api/addlink', async (req, res) => {
         const userSessionId = req.query.sessionId;
         const newLink = req.query.link;
         const subPart = req.query.subPart;
-        const addLinkResult = await mybitlyService.addLink(userSessionId, newLink, subPart);
+        const addLinkResult = await mybitlyService.addLink(userSessionId, subPart, newLink);
 
         if (addLinkResult?.success) {
             res.status(200).send('the link successfully added').end();

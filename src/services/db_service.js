@@ -112,19 +112,12 @@ export default class DbService {
         }
     }
 
-    async findSubPart(subPart) {
+    async getRedirectLink(subPart) {
         try {
-            const filter = { subpart: subPart };
-            const document = await collection.findOne(filter);
-            if (document) {
-                console.log(`SubPart still exist: ${subPart} `);
-                return true;
-            }
+            return await this.collectionLinks.findOne({ _id: subPart })
         } catch (err) {
             console.error(`Something went wrong with findSubPart: ${err} \n`);
         }
-        console.log("SubPart not found:\n");
-        return false;
     }
 
 }

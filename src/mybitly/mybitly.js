@@ -2,8 +2,18 @@ import DbService from '../services/db_service.js'
 
 const mybitlyService = {};
 
-mybitlyService.getRedirectLink = (subPartLink) => {
-    // dbService.insertLink(link);
+mybitlyService.getRedirectLink = async (subPart) => {
+    const dbService = new DbService();
+    try {
+        await dbService.connect();
+        const redirectLinkResult = await dbService.getRedirectLink(subPart);
+        await dbService.closeConnection();
+
+        return redirectLinkResult.redirect;
+    } catch (error) {
+        console.error(`Something went wrong trying to insert the new documents: ${err}\n`);
+        await dbService.closeConnection();
+    }
     // return "https://nodejs.org/";
 }
 
