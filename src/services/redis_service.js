@@ -1,19 +1,30 @@
 import redis from 'redis';
 
-const redisService = {};
+export default class redisService {
+    constructor() {
+        this.redisClient = redis.createClient();
 
-redisService.startClient = () => {
-    const redisClient = redis.createClient();
-    redisClient.connect().catch(console.error);
+        this.connectClient();
+        this.addErrorHandler();
+        this.addConnectOnMessage();
 
-    redisClient.on('error', function (err) {
-        console.log('Could not establish a connection with redis. ' + err);
-    });
-    redisClient.on('connect', function (err) {
-        console.log('Connected to redis successfully');
-    });
-    return redisClient;
+        return this.redisClient;
+    }
+
+    async connectClient() {
+        await this.redisClient.connect().catch(console.error);
+    }
+
+    addErrorHandler() {
+        this.redisClient.on('error', function (err) {
+            console.log('Could not establish a connection with redis. ' + err);
+        });
+    }
+
+    addConnectOnMessage() {
+        this.redisClient.on('connect', function (err) {
+            console.log('Connected to redis successfully');
+        });
+    }
+
 }
-
-
-export default redisService;

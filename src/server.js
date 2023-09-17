@@ -5,11 +5,11 @@ import session from "express-session";
 import redisStorage from 'connect-redis';
 
 import recordRoutes from './routes/routes.js'
-import redisService from './services/redis_service.js';
+import RedisService from './services/redis_service.js';
 
 
 try {
-    const redisClient = redisService.startClient();
+    const redisService = new RedisService();
 
     const app = express()
 
@@ -24,7 +24,7 @@ try {
                 port: process.env.REDIS_STORAGE_PORT,
                 resave: true,
                 saveUninitialized: true,
-                client: redisClient,
+                client: redisService,
                 ttl: process.env.REDIS_STORAGE_TTL,
             }),
             secret: process.env.SECRET_KEY,
