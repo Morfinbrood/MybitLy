@@ -1,14 +1,15 @@
 import redis from 'redis';
 
-export default class redisService {
+export default class RedisService {
     constructor() {
         this.redisClient = redis.createClient();
-
         this.connectClient();
         this.addErrorHandler();
         this.addConnectOnMessage();
+    }
 
-        return this.redisClient;
+    getRedisClient() {
+        return this.redisClient
     }
 
     async connectClient() {
@@ -25,6 +26,24 @@ export default class redisService {
         this.redisClient.on('connect', function (err) {
             console.log('Connected to redis successfully');
         });
+    }
+
+    async getCashedData(key) {
+        try {
+            const getCashedDataResult = await this.redisClient.get(key);
+            return getCashedDataResult;
+        } catch (err) {
+            console.error(`Something went wrong redisService getRedisCashData: ${err}\n`);
+        }
+    }
+
+    async setCashData(key, data, cashTime) {
+        try {
+            const addDataToRedisCashResult = await this.redisClient.set(key, data, { EX: cashTime, NX: true });
+            return addDataToRedisCashResult;
+        } catch (err) {
+            console.error(`Something went wrong redisService  cashRedisData: ${err}\n`);
+        }
     }
 
 }

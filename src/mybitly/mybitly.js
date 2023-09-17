@@ -1,15 +1,26 @@
 import DbService from '../services/db_service.js'
+import RedisService from '../services/redis_service.js';
 
 const mybitlyService = {};
 
 mybitlyService.getRedirectLink = async (subPart) => {
     const dbService = new DbService();
+    const redisService = new RedisService();
     try {
+        const cachedRedirectLink = await redisService.getCashedData(subPart);
+        if (cachedRedirectLink) {
+            return cachedRedirectLink;
+        }
+
         await dbService.connect();
         const redirectLinkResult = await dbService.getRedirectLink(subPart);
+        const redirectLink = redirectLinkResult.redirect;
+
+        const cashTime = process.env.REDIS_CASH_TIME_IN_SEC;
+        await redisService.setCashData(subPart, redirectLink, cashTime);
         await dbService.closeConnection();
 
-        return redirectLinkResult.redirect;
+        return redirectLink;
     } catch (error) {
         console.error(`Something went wrong trying to insert the new documents: ${err}\n`);
         await dbService.closeConnection();

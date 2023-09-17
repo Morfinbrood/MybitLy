@@ -10,6 +10,7 @@ import RedisService from './services/redis_service.js';
 
 try {
     const redisService = new RedisService();
+    const redisClient = redisService.getRedisClient();
 
     const app = express()
 
@@ -24,7 +25,7 @@ try {
                 port: process.env.REDIS_STORAGE_PORT,
                 resave: true,
                 saveUninitialized: true,
-                client: redisService,
+                client: redisClient,
                 ttl: process.env.REDIS_STORAGE_TTL,
             }),
             secret: process.env.SECRET_KEY,
