@@ -66,6 +66,7 @@ export default class DbService {
         }
     }
 
+    //TODO learn and add add concerns(write/read) to all operations 
     async insertNewUserSessionCollectionWithLink(userSession, insertedLinkId) {
         try {
             const userSessionRecord = { "_id": userSession, "links": [{ "$ref": this.nameCollectionLinks, "$id": insertedLinkId }] };
