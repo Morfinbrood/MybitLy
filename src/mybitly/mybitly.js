@@ -18,7 +18,7 @@ mybitlyService.addLink = async (userSession, subPartLink, redirectLink) => {
             // case when insertLinkResult is succefull inserted
             const insertLinkToUserSessionResult = await dbService.insertLinkToUserSessionCollection(userSession, subPartLink, insertLinkResult.insertedId);
             await dbService.closeConnection();
-            if (insertLinkToUserSessionResult?.insertedId) { // chck success or not insertLinkToUserSessionResult ()
+            if (insertLinkToUserSessionResult) { // chck success or not insertLinkToUserSessionResult ()
                 return { success: true };  // all records successfully added
             }
             else {

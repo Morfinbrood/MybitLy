@@ -71,7 +71,7 @@ export default class DbService {
             const userSessionRecord = { "_id": userSession, "links": [{ "$ref": this.nameCollectionLinks, "$id": insertedLinkId }] };
             const insertOneResult = await this.collectionUserSessions.insertOne(userSessionRecord);
             console.log(`${insertOneResult.insertedCount} document successfully inserted in collection ${this.nameCollectionUserSessions}.\n`);
-            return insertOneResult;
+            return true;
         } catch (err) {
             console.error(`Something went wrong getUserSessionRecord: ${err} \n`);
         }
@@ -79,9 +79,9 @@ export default class DbService {
 
     async insertLinkRefInExistUserSessionCollection(userSession, insertedLinkId) {
         try {
-            const insertOneResult = await this.collectionUserSessions.insertOne({ "_id": userSession }, { "$push": { "$ref": this.nameCollectionLinks, "$id": insertedLinkId } });
-            console.log(`${insertOneResult.insertedCount} document successfully inserted in collection ${this.nameCollectionUserSessions}.\n`);
-            return insertOneResult;
+            const modifiedObject = await this.collectionUserSessions.findOneAndUpdate({ "_id": userSession }, { "$push": { links: { "$ref": this.nameCollectionLinks, "$id": insertedLinkId } } });
+            console.log(` document successfully inserted in collection ${this.nameCollectionUserSessions}.\n`);
+            return !!modifiedObject
         } catch (err) {
             console.error(`Something went wrong getUserSessionRecord: ${err} \n`);
         }
@@ -98,11 +98,12 @@ export default class DbService {
 
     async insertLinkToUserSessionCollection(userSession, insertedLinkId) {
         try {
-            let userSessionRecord = await this.getUserSessionRecord(userSession);
-            if (userSessionRecord) {
-                return await this.insertLinkRefInExistUserSessionCollection(userSession, insertedLinkId);
+            const findAndUpdateResult = await this.insertLinkRefInExistUserSessionCollection(userSession, insertedLinkId);
+            if (findAndUpdateResult) {
+                return true;
             } else {
-                return await this.insertNewUserSessionCollectionWithLink(userSession, insertedLinkId);
+                const insertNewUserSession = await this.insertNewUserSessionCollectionWithLink(userSession, insertedLinkId);
+                return insertNewUserSession
             }
 
         } catch (err) {
