@@ -13,12 +13,16 @@ export default class RedisService {
     }
 
     async connectClient() {
-        await this.redisClient.connect().catch(console.error);
+        try {
+            await this.redisClient.connect().catch(console.error);
+        } catch (error) {
+            console.log('ERROR: RedisService: redisClient.connect() ' + err);
+        }
     }
 
     addErrorHandler() {
         this.redisClient.on('error', function (err) {
-            console.log('Could not establish a connection with redis. ' + err);
+            console.log('ERROR: RedisService: redisClient.on ' + err);
         });
     }
 
@@ -31,6 +35,7 @@ export default class RedisService {
     async getCashedData(key) {
         try {
             const getCashedDataResult = await this.redisClient.get(key);
+            console.error(` Successfull get cashed data from Redis data ${key}\n`);
             return getCashedDataResult;
         } catch (err) {
             console.error(`Something went wrong redisService getRedisCashData: ${err}\n`);
