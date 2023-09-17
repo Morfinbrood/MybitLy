@@ -54,7 +54,7 @@ export default class DbService {
             const linkRecord = { "_id": subPartLink, "redirect": redirect };
             const insertResult = await this.collectionLinks.insertOne(linkRecord);
             console.log(`document successfully inserted in collection ${this.nameCollectionLinks}.\n`);
-            return insertResult?.insertedId;
+            return insertResult;
         } catch (err) {
             // If redis cash not working this way will be more faster then before try to check is this subpart exist
             if (err.code === 11000) { // this error is predicatable when user try to add exister subpart
