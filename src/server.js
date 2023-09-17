@@ -4,7 +4,7 @@ import express from "express";
 import session from "express-session";
 import redisStorage from 'connect-redis';
 
-import recordRoutes from './routes/routes.js'
+import RecordRoutes from './routes/routes.js'
 import RedisService from './services/redis_service.js';
 
 
@@ -33,7 +33,8 @@ try {
         })
     );
 
-    app.use(recordRoutes);
+    const addAllrecordRoutes = new RecordRoutes();
+    app.use(addAllrecordRoutes);
 } catch (err) {
     console.error(`Something went wrong with server  err:${err}\n`);
 }
