@@ -16,7 +16,6 @@ export default class DbService {
         this.client;
         this.clientConnect;
         this.db;
-        this.client;
         this.collectionLinks;
         this.collectionUserSessions;
     }
@@ -24,10 +23,10 @@ export default class DbService {
     async connect() {
         try {
             this.client = new MongoClient(this.uri, this.config);
-            this.clientConnect = client.connect();
-            this.db = clientConnect.db(this.dbName);
-            this.collectionLinks = db.collection(this.nameCollectionLinks);
-            this.collectionUserSessions = db.collection(this.nameCollectionUserSessions);
+            this.clientConnect = await this.client.connect();
+            this.db = this.clientConnect.db(this.dbName);
+            this.collectionLinks = this.db.collection(this.nameCollectionLinks);
+            this.collectionUserSessions = this.db.collection(this.nameCollectionUserSessions);
             console.log('connection opened');
             return true;
         } catch (err) {
@@ -52,20 +51,37 @@ export default class DbService {
 
     async insertLinkToLinksCollection(subPartLink, redirect) {
         try {
-            const linkRecord = { _id: subPartLink, redirect: redirect };
+            const linkRecord = { "_id": subPartLink, "redirect": redirect };
             const insertResult = await this.collectionLinks.insertOne(linkRecord);
-            console.log(`${insertResult.insertedCount} document successfully inserted in collection ${this.nameCollectionLinks}.\n`);
-            return insertResult;
+            console.log(`document successfully inserted in collection ${this.nameCollectionLinks}.\n`);
+            return insertResult?.insertedId;
         } catch (err) {
+            // If redis cash not working this way will be more faster then before try to check is this subpart exist
+            if (err.code === 11000) { // this error is predicatable when user try to add exister subpart
+                console.log(`This subpart still exist  subPart: ${subPartLink}\n`);
+                return { denyReason: "subpart still exist" };
+            }
             console.error(`Something went wrong trying to insert the new documents: ${err}\n`);
+            return err;
         }
     }
 
-    async insertLinkRefInUserSessionCollection(newUserSessionRecord, insertedLinkId) {
+    async insertNewUserSessionCollectionWithLink(userSession, insertedLinkId) {
         try {
-            const insertOneResult = await collection.insertOne(newUserSessionRecord, { $push: { "$ref": this.collectionLinks, "$id": insertedLinkId } });
+            const userSessionRecord = { "_id": userSession, "links": [{ "$ref": this.nameCollectionLinks, "$id": insertedLinkId }] };
+            const insertOneResult = await this.collectionUserSessions.insertOne(userSessionRecord);
             console.log(`${insertOneResult.insertedCount} document successfully inserted in collection ${this.nameCollectionUserSessions}.\n`);
-            return true;
+            return insertOneResult;
+        } catch (err) {
+            console.error(`Something went wrong getUserSessionRecord: ${err} \n`);
+        }
+    }
+
+    async insertLinkRefInExistUserSessionCollection(userSession, insertedLinkId) {
+        try {
+            const insertOneResult = await this.collectionUserSessions.insertOne({ "_id": userSession }, { "$push": { "$ref": this.nameCollectionLinks, "$id": insertedLinkId } });
+            console.log(`${insertOneResult.insertedCount} document successfully inserted in collection ${this.nameCollectionUserSessions}.\n`);
+            return insertOneResult;
         } catch (err) {
             console.error(`Something went wrong getUserSessionRecord: ${err} \n`);
         }
@@ -73,7 +89,7 @@ export default class DbService {
 
     async getUserSessionRecord(userSession) {
         try {
-            const userSessionRecord = await collection.findOne({ _id: userSession })
+            const userSessionRecord = await this.collectionUserSessions.findOne({ _id: userSession })
             return userSessionRecord;
         } catch (err) {
             console.error(`Something went wrong getUserSessionRecord: ${err} \n`);
@@ -82,13 +98,13 @@ export default class DbService {
 
     async insertLinkToUserSessionCollection(userSession, insertedLinkId) {
         try {
-            let userSessionRecord = this.getUserSessionRecord(userSession);
-            if (!userSessionRecord) {
-                userSessionRecord = { _id: userSession };
+            let userSessionRecord = await this.getUserSessionRecord(userSession);
+            if (userSessionRecord) {
+                return await this.insertLinkRefInExistUserSessionCollection(userSession, insertedLinkId);
+            } else {
+                return await this.insertNewUserSessionCollectionWithLink(userSession, insertedLinkId);
             }
-            await this.insertLinkRefInUserSessionCollection(userSessionRecord, insertedLinkId);
 
-            return true;
         } catch (err) {
             console.error(`Something went wrong trying to insert the new documents: ${err} \n`);
         }

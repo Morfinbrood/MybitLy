@@ -21,7 +21,7 @@ recordRoutes.get('/', (req, res) => {
     }
 });
 
-recordRoutes.get('/:subpart', (req, res) => {
+recordRoutes.get('/:subpart', async (req, res) => {
     const subpart = req.params["subpart"];
     const redirectLink = mybitlyService.getRedirectLink(subpart);
     if (redirectLink) {
@@ -31,27 +31,31 @@ recordRoutes.get('/:subpart', (req, res) => {
     }
 });
 
-recordRoutes.put('/api/addlink', (req, res) => {
-    if (!req.query || !req.query.sessionId || !req.query.link || !req.query.subPart) {
-        return res.sendStatus(400);
-    }
-
-    const userSessionId = req.query.sessionId;
-    const newLink = req.query.link;
-    const subPart = req.query.subPart;
-
-    const isLinkAdded = mybitlyService.addLink(userSessionId, newLink, subPart);
-    if (isLinkAdded) {
-        res.status(200).send('the link successfully added').end();
-    }
-    else {
-        if (isLinkAdded?.failedReason) {
-            if (isLinkAdded?.failedReason === 'exist') {
-                res.status(200).send('the link cannot be added because it already exists record with the same name').end();
-            }
-            res.status(200).send(isLinkAdded.failedReason).end();
+recordRoutes.put('/api/addlink', async (req, res) => {
+    try {
+        if (!req.query || !req.query.sessionId || !req.query.link || !req.query.subPart) {
+            return res.sendStatus(400);
         }
-        res.status(500).send('Something broke! on server').end();
+
+        const userSessionId = req.query.sessionId;
+        const newLink = req.query.link;
+        const subPart = req.query.subPart;
+        const addLinkResult = await mybitlyService.addLink(userSessionId, newLink, subPart);
+
+        if (addLinkResult?.success) {
+            res.status(200).send('the link successfully added').end();
+        }
+        else {
+            if (addLinkResult?.denyReason) {
+                res.status(200).send(addLinkResult.denyReason).end();
+            }
+            else {
+                throw new Error(`mybitlyService.addLink when try to Insert  req: ${req} `);
+            }
+        }
+
+    } catch (error) {
+        res.status(500).send(`Something broke in route /api/addlink with request ${req}`).end();
     }
 
 });
