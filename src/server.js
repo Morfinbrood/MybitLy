@@ -27,7 +27,7 @@ try {
                 client: redisClient,
                 ttl: process.env.REDIS_STORAGE_TTL,
             }),
-            secret: 'you secret key',
+            secret: process.env.SECRET_KEY,
             saveUninitialized: true,
         })
     );
