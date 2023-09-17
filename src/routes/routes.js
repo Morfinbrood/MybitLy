@@ -1,6 +1,6 @@
 import express from "express";
 import { ignoreFavicon } from '../utils/utils.js';
-import mybitlyService from '../mybitly/mybitly.js'
+import MybitlyService from '../mybitly/mybitly.js'
 
 const recordRoutes = express.Router();
 
@@ -23,7 +23,7 @@ recordRoutes.get('/', (req, res) => {
 
 recordRoutes.get('/:subpart', async (req, res) => {
     const subpart = req.params["subpart"];
-    const redirectLink = await mybitlyService.getRedirectLink(subpart);
+    const redirectLink = await MybitlyService.getRedirectLink(subpart);
     if (redirectLink) {
         res.status(301).redirect(`https://${redirectLink}`);
     } else {
@@ -40,7 +40,7 @@ recordRoutes.put('/api/addlink', async (req, res) => {
         const userSessionId = req.query.sessionId;
         const newLink = req.query.link;
         const subPart = req.query.subPart;
-        const addLinkResult = await mybitlyService.addLink(userSessionId, subPart, newLink);
+        const addLinkResult = await MybitlyService.addLink(userSessionId, subPart, newLink);
 
         if (addLinkResult?.success) {
             res.status(200).send('the link successfully added').end();
