@@ -94,7 +94,6 @@ export default class RecordRoutes {
                 }
 
             } catch (error) {
-                console.error(`Exception: ROUTES /api/addlink req ${userSessionId} subPart ${subPart}  redirect ${redirect}`);
                 console.error(`Exception: ROUTES /api/addlink ERROR ${error}`);
                 res.status(500).send(`Server error`).end();
             }

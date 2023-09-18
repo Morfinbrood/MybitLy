@@ -52,8 +52,8 @@ export default class MybitlyService {
                 else {
                     // case when insertLinkResult is succefull inserted in 'links' BUT no succesfully insert in 'user_session_links'
                     // TODO add revert logic for 'link' insert
-                    console.error(`MybitlyService:addLink insert in 'user_session_links'  was unnsuccessfull ${{ userSession, subPartLink, redirectLink, insertLinkResult, insertLinkToUserSessionResult }}`);
-                    throw new Error(`MybitlyService:addLink insert in 'user_session_links'  was unnsuccessfull ${{ userSession, subPartLink, redirectLink, insertLinkResult, insertLinkToUserSessionResult }}`);
+                    console.error(`MybitlyService:addLink insert in 'user_session_links'  was unnsuccessfull userSession: ${userSession}, subPartLink: ${subPartLink}, redirectLink:${redirectLink} insertLinkToUserSessionResult${insertLinkToUserSessionResult}`);
+                    throw new Error(`MybitlyService:addLink insert in 'user_session_links'  was unnsuccessfull  userSession: ${userSession}, subPartLink: ${subPartLink}, redirectLink:${redirectLink} insertLinkToUserSessionResult${insertLinkToUserSessionResult}`);
                 }
             } else {
                 // case when insertLinkResult unsuccesfull but we have 1 case that not exception - when try to add dublicate SubLink and 
@@ -64,14 +64,13 @@ export default class MybitlyService {
                 }
                 else {
                     // this is real EXCEPTION
-                    console.error(`Link was dined without denyReason ${{ userSession, subPartLink, redirectLink, insertLinkResult, insertLinkToUserSessionResult }}`);
-                    throw new Error(`Link was dined without denyReason ${{ userSession, subPartLink, redirectLink, insertLinkResult, insertLinkToUserSessionResult }}`);
+                    console.error(`Link was denied without denyReason  userSession: ${userSession}, subPartLink: ${subPartLink}, redirectLink:${redirectLink}`);
+                    throw new Error(`Link was denied without denyReason userSession: ${userSession}, subPartLink: ${subPartLink}, redirectLink:${redirectLink} }`);
                 }
             }
         } catch (error) {
-            console.error(`MybitlyService:addLink: ${error} ${{ userSession, subPartLink, redirectLink }}`);
-            throw new Error(`MybitlyService:    static async addLink(userSession, subPartLink, redirectLink) {
-                ${error}`);
+            console.error(`MybitlyService:addLink: ${error} userSession:${userSession}, subPartLink: ${subPartLink}, redirectLink:${redirectLink}`);
+            throw new Error(`MybitlyService:    static async addLink(userSession, subPartLink, redirectLink) ${error}`);
         }
     }
 
