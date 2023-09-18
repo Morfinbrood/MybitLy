@@ -139,7 +139,7 @@ export default class DbService {
         try {
             const userSessionRecord = await this.getUserSessionRecord(userSession);
             if (userSessionRecord && userSessionRecord?.links) {
-                return this.convertArrayOfRefsToArratValues(userSessionRecord.links);
+                return this.convertArrayOfRefsToValuesArr(userSessionRecord.links);
             } else {
                 return [];
             }
@@ -155,10 +155,10 @@ export default class DbService {
         console.log(`MongoDB INDEXES ADDED `);
     }
 
-    convertArrayOfRefsToArratValues(arrayRefs) {
+    convertArrayOfRefsToValuesArr(arrayRefs) {
         const resArr = [];
         arrayRefs.forEach(elObj => {
-            resArr.push(elObj.oid)
+            resArr.push(elObj?.oid)
         });
         return resArr;
     }

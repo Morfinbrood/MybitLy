@@ -28,7 +28,7 @@ export default class RedisService {
     }
 
     addConnectOnMessage() {
-        this.redisClient.on('connect', function (error) {
+        this.redisClient.on('connect', function () {
             console.error('Connected to redis successfully');
         });
     }
