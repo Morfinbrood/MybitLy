@@ -36,6 +36,6 @@ try {
 
     const addAllrecordRoutes = new RecordRoutes();
     app.use(addAllrecordRoutes);
-} catch (err) {
-    console.error(`Something went wrong with server  err:${err}\n`);
+} catch (error) {
+    console.error(`Something went wrong with server  error:${error}`);
 }

@@ -3,6 +3,7 @@ import RedisService from '../services/redis_service.js';
 import { REDIS_CASH_TIME_IN_SEC } from '../constants/constants.js';
 
 export default class MybitlyService {
+
     static async getRedirectLink(subPart) {
         const dbService = new DbService();
         const redisService = new RedisService();
@@ -27,9 +28,10 @@ export default class MybitlyService {
             }
 
             return null
-        } catch (err) {
-            console.error(`MybitlyService:  getRedirectLink: ${err} subPart${subPart}\n`);
+        } catch (error) {
+            console.error(`MybitlyService:  getRedirectLink: ${error} subPart${subPart}`);
             await dbService.closeConnection();
+            throw new Error(`MybitlyService:getRedirectLink  ${error}`);
         }
     }
 
@@ -50,8 +52,8 @@ export default class MybitlyService {
                 else {
                     // case when insertLinkResult is succefull inserted in 'links' BUT no succesfully insert in 'user_session_links'
                     // TODO add revert logic for 'link' insert
-                    console.error(`MybitlyService:addLink insert in 'user_session_links'  was unnsuccessfull ${{ userSession, subPartLink, redirectLink, insertLinkResult, insertLinkToUserSessionResult }}\n`);
-                    throw new Error(`MybitlyService:addLink insert in 'user_session_links'  was unnsuccessfull ${{ userSession, subPartLink, redirectLink, insertLinkResult, insertLinkToUserSessionResult }}\n`);
+                    console.error(`MybitlyService:addLink insert in 'user_session_links'  was unnsuccessfull ${{ userSession, subPartLink, redirectLink, insertLinkResult, insertLinkToUserSessionResult }}`);
+                    throw new Error(`MybitlyService:addLink insert in 'user_session_links'  was unnsuccessfull ${{ userSession, subPartLink, redirectLink, insertLinkResult, insertLinkToUserSessionResult }}`);
                 }
             } else {
                 // case when insertLinkResult unsuccesfull but we have 1 case that not exception - when try to add dublicate SubLink and 
@@ -62,12 +64,14 @@ export default class MybitlyService {
                 }
                 else {
                     // this is real EXCEPTION
-                    console.error(`Link was dined without denyReason ${{ userSession, subPartLink, redirectLink, insertLinkResult, insertLinkToUserSessionResult }}\n`);
-                    throw new Error(`Link was dined without denyReason ${{ userSession, subPartLink, redirectLink, insertLinkResult, insertLinkToUserSessionResult }}\n`);
+                    console.error(`Link was dined without denyReason ${{ userSession, subPartLink, redirectLink, insertLinkResult, insertLinkToUserSessionResult }}`);
+                    throw new Error(`Link was dined without denyReason ${{ userSession, subPartLink, redirectLink, insertLinkResult, insertLinkToUserSessionResult }}`);
                 }
             }
-        } catch (err) {
-            console.error(`MybitlyService:addLink: ${err} ${{ userSession, subPartLink, redirectLink }}\n`);
+        } catch (error) {
+            console.error(`MybitlyService:addLink: ${error} ${{ userSession, subPartLink, redirectLink }}`);
+            throw new Error(`MybitlyService:    static async addLink(userSession, subPartLink, redirectLink) {
+                ${error}`);
         }
     }
 

@@ -16,8 +16,8 @@ export default class RecordRoutes {
     }
 
     addErrorHandler() {
-        this.recordRoutes.use(function (err, req, res, next) {
-            console.error(`Something broke on server! err = ${err}, req = ${req}`);
+        this.recordRoutes.use(function (error, req, res, next) {
+            console.error(`Something broke on server! error = ${error}, req = ${req}`);
             res.status(500).send('Something broke on server!').end();
         })
     }
@@ -28,27 +28,37 @@ export default class RecordRoutes {
 
     addHomePageRoute() {
         this.recordRoutes.get('/', (req, res) => {
-            if (req?.session?.id) {
-                res.write(`<h1>Welcome  you session with uid:</h1><br>`);
-                res.write(`<h1> ${req.session.id} </h1><br>`);
-                res.end(`<h3>This is the Home page</h3>`);
-            } else {
-                res.end(`<h1>something wrong with gerenate session </h1><br>`);
+            try {
+                if (req?.session?.id) {
+                    res.write(`<h1>Welcome  you session with uid:</h1><br>`);
+                    res.write(`<h1> ${req.session.id} </h1><br>`);
+                    res.end(`<h3>This is the Home page</h3>`);
+                } else {
+                    res.end(`<h1>something wrong with gerenate session </h1><br>`);
+                }
+            } catch (error) {
+                console.error(`Exception: ROUTES /api/addlink ERROR ${error}`);
+                res.status(500).send(`Server error`).end();
             }
         })
     }
 
     addSubPartHandlerRoute() {
         this.recordRoutes.get('/:subpart', async (req, res) => {
-            console.log(`ROUTES get url ${req?.url} `);
-            const subpart = req.params["subpart"];
-            const redirectLink = await MybitlyService.getRedirectLink(subpart);
-            if (redirectLink) {
-                console.log(`redirect user to https://${redirectLink}`);
-                res.status(301).redirect(`https://${redirectLink}`);
-            } else {
-                console.log(`redirect link for subpart ${subpart} not found`);
-                res.status(404).send('link not found')
+            try {
+                console.log(`\n  ROUTES get url ${req?.url} `);
+                const subpart = req.params["subpart"];
+                const redirectLink = await MybitlyService.getRedirectLink(subpart);
+                if (redirectLink) {
+                    console.log(`redirect user to https://${redirectLink}`);
+                    res.status(301).redirect(`https://${redirectLink}`);
+                } else {
+                    console.log(`redirect link for subpart ${subpart} not found`);
+                    res.status(404).send('link not found')
+                }
+            } catch (error) {
+                console.error(`Exception: ROUTES /api/addlink ERROR ${error}`);
+                res.status(500).send(`Server error`).end();
             }
         });
     }
@@ -56,21 +66,25 @@ export default class RecordRoutes {
     addAddLinkHandlerRoute() {
         this.recordRoutes.put('/api/addlink', async (req, res) => {
             try {
-                if (!req.query || !req.query.sessionId || !req.query.link || !req.query.subPart) {
+                if (!req.query || !req.query.sessionId || !req.query.redirect || !req.query.subPart) {
                     console.error(`ROUTES try to addlink Not correct request: ${req} `);
                     return res.sendStatus(400);
                 }
 
                 const userSessionId = req.query.sessionId;
-                const newLink = req.query.link;
+                const redirect = req.query.redirect;
                 const subPart = req.query.subPart;
-                const addLinkResult = await MybitlyService.addLink(userSessionId, subPart, newLink);
+
+                console.log(`\n  ROUTES /api/addlink userSessionId ${userSessionId} subPart ${subPart}  redirect ${redirect} `);
+
+                const addLinkResult = await MybitlyService.addLink(userSessionId, subPart, redirect);
 
                 if (addLinkResult?.success) {
                     res.status(200).send('the link successfully added').end();
                 }
                 else {
                     if (addLinkResult?.denyReason) {
+                        console.log(`Dublicate subPart`);
                         res.status(200).send(addLinkResult.denyReason).end();
                     }
                     else {
@@ -80,7 +94,9 @@ export default class RecordRoutes {
                 }
 
             } catch (error) {
-                res.status(500).send(`Something broke in route /api/addlink with request ${req}`).end();
+                console.error(`Exception: ROUTES /api/addlink req ${userSessionId} subPart ${subPart}  redirect ${redirect}`);
+                console.error(`Exception: ROUTES /api/addlink ERROR ${error}`);
+                res.status(500).send(`Server error`).end();
             }
         });
     }

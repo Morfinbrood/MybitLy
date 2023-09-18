@@ -16,18 +16,19 @@ export default class RedisService {
         try {
             await this.redisClient.connect().catch(console.error);
         } catch (error) {
-            console.error('RedisService: redisClient.connect() ' + err);
+            console.error('RedisService: redisClient.connect() ' + error);
+            throw new Error(`RedisService:connectClient  ${error}`);
         }
     }
 
     addErrorHandler() {
-        this.redisClient.on('error', function (err) {
-            console.error('ERROR: RedisService: redisClient.on ' + err);
+        this.redisClient.on('error', function (error) {
+            console.error('ERROR: RedisService: redisClient.on ' + error);
         });
     }
 
     addConnectOnMessage() {
-        this.redisClient.on('connect', function (err) {
+        this.redisClient.on('connect', function (error) {
             console.error('Connected to redis successfully');
         });
     }
@@ -35,21 +36,22 @@ export default class RedisService {
     async getCashedData(key) {
         try {
             const getCashedDataResult = await this.redisClient.get(key);
-            console.log(`Successfull get cashed data from Redis with ${key}  data: ${getCashedDataResult}\n`);
+            console.log(`Successfull get cashed data from Redis with ${key}  data: ${getCashedDataResult}`);
             return getCashedDataResult;
-        } catch (err) {
-            console.error(`Something went wrong redisService getRedisCashData: ${err}\n`);
+        } catch (error) {
+            console.error(`Something went wrong redisService getRedisCashData: ${error}`);
+            throw new Error(`RedisService:getCashedData  ${error}`);
         }
     }
 
     async setCashData(key, data, cashTime) {
         try {
             const addDataToRedisCashResult = await this.redisClient.set(key, data, { EX: cashTime, NX: true });
-            console.log(`Successfull set cashed data from Redis data ${{ key, data, cashTime }}\n`);
+            console.log(`Successfull set cashed data from Redis data ${{ key, data, cashTime }}`);
             return addDataToRedisCashResult;
-        } catch (err) {
-            console.error(`Something went wrong redisService  cashRedisData: ${err}\n`);
+        } catch (error) {
+            console.error(`Something went wrong redisService  cashRedisData: ${error}`);
+            throw new Error(`RedisService:setCashData  ${error}`);
         }
     }
-
 }
