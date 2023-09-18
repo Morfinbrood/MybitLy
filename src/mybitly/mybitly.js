@@ -24,7 +24,6 @@ export default class MybitlyService {
             console.error(`MybitlyService:  getRedirectLink: ${err} subPart${subPart}\n`);
             await dbService.closeConnection();
         }
-        // return "https://nodejs.org/";
     }
 
     static async addLink(userSession, subPartLink, redirectLink) {
