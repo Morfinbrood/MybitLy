@@ -64,14 +64,14 @@ export default class RecordRoutes {
     }
 
     addAddLinkHandlerRoute() {
-        this.recordRoutes.put('/api/addlink', async (req, res) => {
+        this.recordRoutes.put('/addlink', async (req, res) => {
             try {
-                if (!req.query || !req.query.sessionId || !req.query.redirect || !req.query.subPart) {
+                if (!req?.query || !req?.session?.id || !req?.query?.redirect || !req?.query?.subPart) {
                     console.error(`ROUTES try to addlink Not correct request: ${req} `);
                     return res.sendStatus(400);
                 }
 
-                const userSessionId = req.query.sessionId;
+                const userSessionId = req.session.id
                 const redirect = req.query.redirect;
                 const subPart = req.query.subPart;
 

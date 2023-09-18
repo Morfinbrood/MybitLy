@@ -16,7 +16,7 @@ try {
     const app = express()
 
     app.listen(process.env.EXPRESS_PORT, process.env.EXPRESS_HOST, function () {
-        console.log(`Server listens http://${process.env.EXPRESS_PORT}:${process.env.EXPRESS_HOST}`);
+        console.log(`Server listens http://${process.env.EXPRESS_HOST}:${process.env.EXPRESS_PORT}`);
     });
 
     app.use(
