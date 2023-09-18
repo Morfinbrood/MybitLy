@@ -22,3 +22,6 @@ Example: http://127.0.0.1:7000/aaaa
 
 PUT http://127.0.0.1:7000/api/addlink'   -> with redirect  and  subPart querries
 Example: http://127.0.0.1:7000/addlink?redirect=ya.ru&subPart=a2
+
+
+GET http://127.0.0.1:7000/api/getUserLinks'   ->  return all link for this User by his session

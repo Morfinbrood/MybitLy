@@ -11,6 +11,7 @@ export default class RecordRoutes {
         this.addHomePageRoute();
         this.addSubPartHandlerRoute();
         this.addAddLinkHandlerRoute();
+        this.addRouteGetUserLinksBySession();
 
         return this.recordRoutes;
     }
@@ -63,19 +64,40 @@ export default class RecordRoutes {
         });
     }
 
-    addAddLinkHandlerRoute() {
-        this.recordRoutes.put('/addlink', async (req, res) => {
+    addRouteGetUserLinksBySession() {
+        this.recordRoutes.get('/api/getUserLinks', async (req, res) => {
             try {
-                if (!req?.query || !req?.session?.id || !req?.query?.redirect || !req?.query?.subPart) {
+                const userSessionId = req.session.id;
+                console.log(`\n  ROUTES /api/addlink userSessionId ${userSessionId} `);
+                const getLinks = await MybitlyService.getUserLinks(userSessionId);
+
+                if (getLinks) {
+                    res.status(200).send(`the User links ${getLinks}`).end();
+                }
+                else {
+                    console.error(`ERROR: ROUTES: /getUserLinks ${req} `);
+                    throw new Error(`ERROR: ROUTES: /getUserLinks ${req} `);
+                }
+            } catch (error) {
+                console.error(`Exception: ROUTES /getUserLinks ERROR ${error}`);
+                res.status(500).send(`Server error`).end();
+            }
+        });
+    }
+
+    addAddLinkHandlerRoute() {
+        this.recordRoutes.put('/api/addlink', async (req, res) => {
+            try {
+                if (!req?.query || !req?.session?.id || !req?.query?.redirect || !req?.query?.subpart) {
                     console.error(`ROUTES try to addlink Not correct request: ${req} `);
                     return res.sendStatus(400);
                 }
 
                 const userSessionId = req.session.id
                 const redirect = req.query.redirect;
-                const subPart = req.query.subPart;
+                const subPart = req.query.subpart;
 
-                console.log(`\n  ROUTES /api/addlink userSessionId ${userSessionId} subPart ${subPart}  redirect ${redirect} `);
+                console.log(`\n  ROUTES /addlink userSessionId ${userSessionId} subPart ${subPart}  redirect ${redirect} `);
 
                 const addLinkResult = await MybitlyService.addLink(userSessionId, subPart, redirect);
 
@@ -94,9 +116,10 @@ export default class RecordRoutes {
                 }
 
             } catch (error) {
-                console.error(`Exception: ROUTES /api/addlink ERROR ${error}`);
+                console.error(`Exception: ROUTES /addlink ERROR ${error}`);
                 res.status(500).send(`Server error`).end();
             }
         });
     }
+
 };

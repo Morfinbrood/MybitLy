@@ -70,8 +70,24 @@ export default class MybitlyService {
             }
         } catch (error) {
             console.error(`MybitlyService:addLink: ${error} userSession:${userSession}, subPartLink: ${subPartLink}, redirectLink:${redirectLink}`);
-            throw new Error(`MybitlyService:    static async addLink(userSession, subPartLink, redirectLink) ${error}`);
+            throw new Error(`MybitlyService:  addLink ${error}`);
         }
+    }
+
+    static async getUserLinks(userSession) {
+        try {
+            const dbService = new DbService();
+            await dbService.connect();
+            const getUserLinksResult = await dbService.getUserLinksResultBySession(userSession);
+            if (getUserLinksResult) {
+                await dbService.closeConnection();
+                return getUserLinksResult;
+            }
+        } catch (error) {
+            console.error(`MybitlyService:getUserLinks: ${error} userSession:${userSession}`);
+            throw new Error(`MybitlyService: async getUserLinks ${error}`);
+        }
+
     }
 
 }

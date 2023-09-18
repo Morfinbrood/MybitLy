@@ -98,17 +98,6 @@ export default class DbService {
         }
     }
 
-    async getUserSessionRecord(userSession) {
-        try {
-            const userSessionRecord = await this.collectionUserSessions.findOne({ _id: userSession });
-            console.log(`Success find userSession Record with session ${userSession}`);
-            return userSessionRecord;
-        } catch (error) {
-            console.error(`Exception  error:${error}  userSession ${userSession}`);
-            throw new Error(`DbService:getUserSessionRecord  ${error}`);
-        }
-    }
-
     async insertLinkToUserSessionCollection(userSession, insertedLinkId) {
         try {
             const findAndUpdateResult = await this.insertLinkRefInExistUserSessionCollection(userSession, insertedLinkId);
@@ -135,10 +124,43 @@ export default class DbService {
         }
     }
 
+    async getUserSessionRecord(userSession) {
+        try {
+            const userSessionRecord = await this.collectionUserSessions.findOne({ _id: userSession });
+            console.log(`Success find userSession Record with session ${userSession}`);
+            return userSessionRecord;
+        } catch (error) {
+            console.error(`Exception  error:${error}  userSession ${userSession}`);
+            throw new Error(`DbService:getUserSessionRecord  ${error}`);
+        }
+    }
+
+    async getUserLinksResultBySession(userSession) {
+        try {
+            const userSessionRecord = await this.getUserSessionRecord(userSession);
+            if (userSessionRecord && userSessionRecord?.links) {
+                return this.convertArrayOfRefsToArratValues(userSessionRecord.links);
+            } else {
+                return [];
+            }
+        } catch (error) {
+            console.error(`Exception  error:${error}  userSession ${userSession}`);
+            throw new Error(`DbService:getUserLinksResultBySession  ${error}`);
+        }
+    }
+
     async addIndexes() {
         await this.collectionLinks.createIndex({ "createdAt": 1 }, { expireAfterSeconds: 300 });
         await this.collectionUserSessions.createIndex({ "createdAt": 1 }, { expireAfterSeconds: 300 });
         console.log(`MongoDB INDEXES ADDED `);
+    }
+
+    convertArrayOfRefsToArratValues(arrayRefs) {
+        const resArr = [];
+        arrayRefs.forEach(elObj => {
+            resArr.push(elObj.oid)
+        });
+        return resArr;
     }
 
 }
