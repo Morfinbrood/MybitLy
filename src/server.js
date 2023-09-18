@@ -3,6 +3,7 @@ import { } from 'dotenv/config'
 import express from "express";
 import session from "express-session";
 import redisStorage from 'connect-redis';
+import { REDIS_STORAGE_TTL } from './constants/constants.js';
 
 import RecordRoutes from './routes/routes.js'
 import RedisService from './services/redis_service.js';
@@ -26,7 +27,7 @@ try {
                 resave: true,
                 saveUninitialized: true,
                 client: redisClient,
-                ttl: process.env.REDIS_STORAGE_TTL,
+                ttl: REDIS_STORAGE_TTL,
             }),
             secret: process.env.SECRET_KEY,
             saveUninitialized: true,

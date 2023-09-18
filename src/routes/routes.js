@@ -17,11 +17,10 @@ export default class RecordRoutes {
 
     addErrorHandler() {
         this.recordRoutes.use(function (err, req, res, next) {
-            console.error(err.stack)
-            res.status(500).send('Something broke!').end();
+            console.error(`Something broke on server! err = ${err}, req = ${req}`);
+            res.status(500).send('Something broke on server!').end();
         })
     }
-
 
     addIngonreFavicon() {
         this.recordRoutes.use(ignoreFavicon);
@@ -41,11 +40,14 @@ export default class RecordRoutes {
 
     addSubPartHandlerRoute() {
         this.recordRoutes.get('/:subpart', async (req, res) => {
+            console.log(`ROUTES get url ${req?.url} `);
             const subpart = req.params["subpart"];
             const redirectLink = await MybitlyService.getRedirectLink(subpart);
             if (redirectLink) {
+                console.log(`redirect user to https://${redirectLink}`);
                 res.status(301).redirect(`https://${redirectLink}`);
             } else {
+                console.log(`redirect link for subpart ${subpart} not found`);
                 res.status(404).send('link not found')
             }
         });
@@ -55,6 +57,7 @@ export default class RecordRoutes {
         this.recordRoutes.put('/api/addlink', async (req, res) => {
             try {
                 if (!req.query || !req.query.sessionId || !req.query.link || !req.query.subPart) {
+                    console.error(`ROUTES try to addlink Not correct request: ${req} `);
                     return res.sendStatus(400);
                 }
 
@@ -71,16 +74,14 @@ export default class RecordRoutes {
                         res.status(200).send(addLinkResult.denyReason).end();
                     }
                     else {
-                        throw new Error(`mybitlyService.addLink when try to Insert  req: ${req} `);
+                        console.error(`ERROR: ROUTES: addAddLinkHandlerRoute ${req} `);
+                        throw new Error(`ERROR: ROUTES: addAddLinkHandlerRoute ${req} `);
                     }
                 }
 
             } catch (error) {
                 res.status(500).send(`Something broke in route /api/addlink with request ${req}`).end();
             }
-
         });
-
     }
-
 };

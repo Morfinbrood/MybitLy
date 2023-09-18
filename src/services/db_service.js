@@ -27,10 +27,10 @@ export default class DbService {
             this.db = this.clientConnect.db(this.dbName);
             this.collectionLinks = this.db.collection(this.nameCollectionLinks);
             this.collectionUserSessions = this.db.collection(this.nameCollectionUserSessions);
-            console.log('connection opened');
+            console.log(`MongoDB connection opened`);
             return true;
         } catch (err) {
-            console.error(`Something went wrong with open db connection: ${err}\n`);
+            console.error(`Something went wrong with open db connection: ${err}`);
         }
     }
 
@@ -42,7 +42,7 @@ export default class DbService {
             this.collectionLinks = null;
             this.collectionUserSessions = null;
             this.client = null;
-            console.log('connection closed');
+            console.log('mongodb connection closed ');
             return true;
         } catch (err) {
             console.error(`Something went wrong with closing connection: ${err}\n`);
@@ -53,7 +53,7 @@ export default class DbService {
         try {
             const linkRecord = { "_id": subPartLink, "redirect": redirect };
             const insertResult = await this.collectionLinks.insertOne(linkRecord);
-            console.log(`document successfully inserted in collection ${this.nameCollectionLinks}.\n`);
+            console.log(`document: ${linkRecord} successfully inserted in collection ${this.nameCollectionLinks}.\n`);
             return insertResult;
         } catch (err) {
             // If redis cash not working this way will be more faster then before try to check is this subpart exist
@@ -70,30 +70,31 @@ export default class DbService {
     async insertNewUserSessionCollectionWithLink(userSession, insertedLinkId) {
         try {
             const userSessionRecord = { "_id": userSession, "links": [{ "$ref": this.nameCollectionLinks, "$id": insertedLinkId }] };
-            const insertOneResult = await this.collectionUserSessions.insertOne(userSessionRecord);
-            console.log(`${insertOneResult.insertedCount} document successfully inserted in collection ${this.nameCollectionUserSessions}.\n`);
+            await this.collectionUserSessions.insertOne(userSessionRecord);
+            console.log(`document  ${userSessionRecord} successfully inserted in collection ${this.nameCollectionUserSessions}.\n`);
             return true;
         } catch (err) {
-            console.error(`Something went wrong getUserSessionRecord: ${err} \n`);
+            console.error(`Something went wrong  with insertNewUserSessionCollectionWithLink: ${err} ${{ userSession, insertedLinkId }}\n`);
         }
     }
 
     async insertLinkRefInExistUserSessionCollection(userSession, insertedLinkId) {
         try {
             const modifiedObject = await this.collectionUserSessions.findOneAndUpdate({ "_id": userSession }, { "$push": { links: { "$ref": this.nameCollectionLinks, "$id": insertedLinkId } } });
-            console.log(` document successfully inserted in collection ${this.nameCollectionUserSessions}.\n`);
+            console.log(`document ${modifiedObject} successfully updated in collection ${this.nameCollectionUserSessions} win added linkId ${insertedLinkId}.\n`);
             return !!modifiedObject
         } catch (err) {
-            console.error(`Something went wrong getUserSessionRecord: ${err} \n`);
+            console.error(`Something went wrong with insertLinkRefInExistUserSessionCollection: ${err}  ${{ userSession, insertedLinkId }}\n`);
         }
     }
 
     async getUserSessionRecord(userSession) {
         try {
-            const userSessionRecord = await this.collectionUserSessions.findOne({ _id: userSession })
+            const userSessionRecord = await this.collectionUserSessions.findOne({ _id: userSession });
+            console.log(`getUserSessionRecord with session ${userSession} with result ${userSessionRecord}`)
             return userSessionRecord;
         } catch (err) {
-            console.error(`Something went wrong getUserSessionRecord: ${err} \n`);
+            console.error(`Something went wrong getUserSessionRecord: ${err}  userSession: ${userSession} \n`);
         }
     }
 
@@ -106,18 +107,18 @@ export default class DbService {
                 const insertNewUserSession = await this.insertNewUserSessionCollectionWithLink(userSession, insertedLinkId);
                 return insertNewUserSession
             }
-
         } catch (err) {
-            console.error(`Something went wrong trying to insert the new documents: ${err} \n`);
+            console.error(`Something went wrong trying to insert the new documents: ${err}  ${{ userSession, insertedLinkId }}\n`);
         }
     }
 
     async getRedirectLink(subPart) {
         try {
-            return await this.collectionLinks.findOne({ _id: subPart })
+            const getRedirectLinkResult = await this.collectionLinks.findOne({ _id: subPart });
+            console.log(`GetRedirectLink with result ${getRedirectLinkResult}`);
+            return getRedirectLinkResult;
         } catch (err) {
-            console.error(`Something went wrong with findSubPart: ${err} \n`);
+            console.error(`Something went wrong with getRedirectLink: ${err} subPart ${subPart}  \n`);
         }
     }
-
 }
