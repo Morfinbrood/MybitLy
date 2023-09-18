@@ -56,13 +56,13 @@ export default class DbService {
             console.log(`document: ${linkRecord} successfully inserted in collection ${this.nameCollectionLinks}.\n`);
             return insertResult;
         } catch (err) {
-            // If redis cash not working this way will be more faster then before try to check is this subpart exist
-            if (err.code === 11000) { // this error is predicatable when user try to add exister subpart
+            // I don't want to use additional findOne I think this way more performance
+            // BUT this is not looks beaty
+            if (err.code === 11000) {
                 console.log(`This subpart still exist  subPart: ${subPartLink}\n`);
                 return { denyReason: "subpart still exist" };
             }
-            console.error(`Something went wrong trying to insert the new documents: ${err}\n`);
-            return err;
+            console.error(`Something really went wrong trying to insert the new documents in collection ${this.nameCollectionLinks} : ${err}  ${{ subPartLink, redirect }}\n`);
         }
     }
 
